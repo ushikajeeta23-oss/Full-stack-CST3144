@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pet Store</title>
+    <style>
+      .cart-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .cart-icon {
+        width: 18px;
+        height: 18px;
+      }
+    </style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  </head>
+  <body>
+    <div id="petstore">
+      <button
+        class="cart-button"
+        type="button"
+        :disabled="numberOfItems < 1"
+        @click="checkout"
+      >
+        <svg
+          class="cart-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="9" cy="21" r="1" />
+          <circle cx="20" cy="21" r="1" />
+          <path
+            d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+          />
+        </svg>
+        {{ displayCart ? "Back to Store" : "Checkout" }} ({{ numberOfItems }})
+      </button>
+
+      <div v-if="!displayCart">
+        <h1>{{message}}</h1>
+        <h2 v-text="product.title"></h2>
+        <p v-text="product.id"></p>
+        <p v-text="product.description"></p>
+        <p>Price:Rs {{product.price}}</p>
+        <p>Availability:{{product.availability}}</p>
+        <img :src="product.image" alt="Product Image" />
+        <button type="button" :disabled="!canAddToCart" @click="addToCart">
+          Add to Cart
+        </button>
+        <p v-if="cartIsFull">
+          You cannot add more - cart limit of {{ maxCartSize }} reached.
+        </p>
+        <p v-else-if="product.availability === 0">
+          Sorry, this item is sold out.
+        </p>
+      </div>
+
+      <div v-else>
+        <h2>Checkout</h2>
+        <p>You have {{ numberOfItems }} item(s) in your cart.</p>
+        <button
+          class="cart-button"
+          type="button"
+          @click="checkout"
+        >
+          Back to Store ({{ numberOfItems }})
+        </button>
+      </div>
+    </div>
+    <script>
+      const { createApp } = Vue;
+      const myApp = Vue.createApp({
+        data() {
+          return {
+            message: "Welcome to my PetStore !!!",
+            product: {
+              id: 1101,
+              title: "Best Cat Food for your cat",
+              description: "Irresistivle Cat Food",
+              price: 2000,
+              image: "images/pet-cat.png",
+              availability: 5,
+            },
+            cart: [],
+            displayCart: false,
+            maxCartSize: 5,
+          };
+        },
+        computed: {
+          canAddToCart() {
+            return this.product.availability > 0 && this.numberOfItems < this.maxCartSize;
+          },
+          numberOfItems() {
+            return this.cart.length;
+          },
+          cartIsFull() {
+            return this.numberOfItems >= this.maxCartSize;
+          },
+        },
+        methods: {
+          addToCart() {
+            if (!this.canAddToCart) {
+              return;
+            }
+            this.cart.push(this.product.id);
+            this.product.availability -= 1;
+          },
+          checkout() {
+            this.displayCart = !this.displayCart;
+          },
+        },
+      });
+
+      myApp.mount("#petstore");
+    </script>
+  </body>
+</html>
